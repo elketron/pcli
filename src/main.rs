@@ -25,6 +25,11 @@ enum Commands {
         #[arg(long,short)]
         template: Option<String>
     },
+    Open {
+        name: Option<String>,
+        #[arg(long,short)]
+        select: bool
+    },
     /// template commands
     Template(templating::Templates)
 }
@@ -45,6 +50,14 @@ fn main() {
         Commands::New{ name, template } => {
             projects::projects::new(name, template)
         },
+        Commands::Open {name, select} => {
+            if name == None && !select {
+                println!("at least one of the two must have a value");
+                std::process::exit(1);
+            }
+
+            projects::projects::open(name.unwrap_or("".to_string()), select)
+        }
         Commands::Template(tem) => {
             templating::templates_match(tem.command.unwrap())
         }

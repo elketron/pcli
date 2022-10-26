@@ -9,6 +9,7 @@ use crate::json_io;
 use crate::cmd;
 
 use std::fs;
+use std::env;
 use std::path::Path;
 
 const PROJECTS_FILE: &str = "/projects.json";
@@ -27,7 +28,7 @@ pub fn add(name: String, path: Option<String>) {
     let mut data: Vec<db::projectsDb> = json_io::read_json(&filename);
     
     // if project already exists
-    if data.iter().any(|i| i.name == project.name) {
+    if data.iter().any(|i| i.path == project.path) {
         std::process::exit(1);
     }
 
@@ -56,6 +57,35 @@ pub fn new(name: String, template: Option<String>) {
     };
     
     add(name, Some(project));
+}
+
+pub fn open(mut name: String, select: bool) {
+    let filename = xdg::xdg_data_dir("pcli") + PROJECTS_FILE;
+    let data: Vec<db::projectsDb> = json_io::read_json(&filename);
+    let project: &db::projectsDb;
+
+    if select {
+        let mut names: Vec<&String> = vec![];
+        for project in data.iter() {
+            names.push(&project.name);
+        }
+        name = cmd::fzf(names);
+    }
+    
+    project = match data.iter().find(|i| i.name == name) {
+        None => std::process::exit(1),
+        el => el.unwrap()
+    };
+    
+    let path = Path::new(&project.path);
+    
+    match env::set_current_dir(path) {
+        Ok(_) => cmd::open_editor(),
+        Err(err) => {
+            println!("{:?}", err);
+            std::process::exit(1);
+        }
+    };   
 }
 
 fn default_project(path: String) {
