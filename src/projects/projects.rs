@@ -2,22 +2,20 @@ use crate::projects::db;
 use crate::templating::projects::{
     PROJECTS_TEMPLATE_FILE, 
     TEMPLATE_XDG_FOLDER,    
-    ProjectTemplate
 };
 use crate::xdg;
-use crate::json_io;
 use crate::cmd;
+use crate::structs::data::Data;
 
 use std::fs;
 use std::env;
 use std::path::Path;
 
 const PROJECTS_FILE: &str = "/projects.json";
+type ProjData = Data<db::ProjectsDb>;
 
 pub fn add(name: String, path: Option<String>) {
-    let filename = xdg::xdg_data_dir("pcli") + PROJECTS_FILE;
-
-    let project = db::projectsDb {
+    let project = db::ProjectsDb {
         name,
         path: match path {
             None => std::env::current_dir().unwrap(),
@@ -25,54 +23,51 @@ pub fn add(name: String, path: Option<String>) {
         } 
     };
 
-    let mut data: Vec<db::projectsDb> = json_io::read_json(&filename);
+    let mut data: ProjData= Data::read(PROJECTS_FILE);
     
-    // if project already exists
-    if data.iter().any(|i| i.path == project.path) {
+    if data.exists(|i| i.path == project.path){
         std::process::exit(1);
     }
 
     data.push(project);
-
-    json_io::write_json(&filename, data);
+    
+    data.write();
 }
 
 pub fn new(name: String, template: Option<String>) {
-    let template_file = xdg::xdg_data_dir("pcli") + PROJECTS_TEMPLATE_FILE;
-    let template_data: Vec<ProjectTemplate> = json_io::read_json(&template_file);
-    let project = xdg::get_projects_dir() + &name;
+    let data: ProjData = Data::read(PROJECTS_TEMPLATE_FILE);
+    let project_dir = xdg::get_projects_dir() + &name;
     
     match template {
         None => {
-            default_project(project.clone());
+            default_project(project_dir.clone());
         },
-        tem => {        
-            if template_data.iter().any(|i| &i.name == tem.as_ref().unwrap()) {
-               let source = xdg::xdg_data_dir(TEMPLATE_XDG_FOLDER) + &tem.unwrap();
-                cmd::mv(&source, &project); 
+        name => {        
+            if data.exists(|i| &i.name == name.as_ref().unwrap()) {
+                let source = xdg::xdg_data_dir(TEMPLATE_XDG_FOLDER) + &name.unwrap();
+                cmd::cp(&source, &project_dir); 
             } else {
                 std::process::exit(1);
             }
         }
     };
     
-    add(name, Some(project));
+    add(name, Some(project_dir));
 }
 
 pub fn open(mut name: String, select: bool) {
-    let filename = xdg::xdg_data_dir("pcli") + PROJECTS_FILE;
-    let data: Vec<db::projectsDb> = json_io::read_json(&filename);
-    let project: &db::projectsDb;
+    let data: ProjData = Data::read(PROJECTS_FILE);
+    let project: &db::ProjectsDb;
 
     if select {
         let mut names: Vec<&String> = vec![];
-        for project in data.iter() {
+        for project in data.data.iter() {
             names.push(&project.name);
         }
         name = cmd::fzf(names);
     }
     
-    project = match data.iter().find(|i| i.name == name) {
+    project = match data.find(|i| i.name == name) {
         None => std::process::exit(1),
         el => el.unwrap()
     };
@@ -80,7 +75,7 @@ pub fn open(mut name: String, select: bool) {
     let path = Path::new(&project.path);
     
     match env::set_current_dir(path) {
-        Ok(_) => cmd::open_editor(),
+        Ok(_) => cmd::open_editor(None),
         Err(err) => {
             println!("{:?}", err);
             std::process::exit(1);

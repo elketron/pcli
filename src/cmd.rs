@@ -2,11 +2,18 @@ use std::process::{Command, Stdio};
 use std::io::Write;
 use std::env;
 
-pub fn mv(source: &str, dest: &str){
+pub fn mv(source: &str, dest: &str) {
     Command::new("mv")
         .args([source, dest])
         .spawn()
         .expect("could not move folder/ file");
+}
+
+pub fn cp(source: &str, dest: &str) {
+    Command::new("cp")
+        .args([source, dest])
+        .spawn()
+        .expect("failed to copy folder/file");
 }
 
 pub fn fzf<T: std::fmt::Display>(vals: Vec<T>) -> String {
@@ -31,15 +38,15 @@ pub fn fzf<T: std::fmt::Display>(vals: Vec<T>) -> String {
     return val;
 }
 
-pub fn open_editor() -> std::process::ExitStatus {
+pub fn open_editor(file: Option<String>) -> std::process::ExitStatus {
     // get editor 
     let editor = match env::var("EDITOR") {
         Ok(val) => val,
         Err(_) => "".to_string()
     };
-    
+    let arg = editor + " " + &file.unwrap_or("".to_string());
     let command = Command::new("/usr/bin/sh")
-        .args(["-c", &editor])
+        .args(["-c", &arg])
         .spawn()
         .expect("Error: Failed to run editor")
         .wait()
