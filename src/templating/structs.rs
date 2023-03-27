@@ -3,16 +3,34 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-enum TemplateType {
-    FileTemplate,
-    ProjectTemplate,
+pub enum ProjectType {
+    Cli,
+    API,
+    Desktop,
+    Server,
+    Library,
+    Webapp,
 }
 
 #[derive(Serialize, Deserialize)]
-struct Template {
-    name: String,
+pub struct Template {
+    pub project_templates: Vec<ProjectTemplate>,
+    pub file_templates: Vec<FileTemplate>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ProjectTemplate {
+    pub name: String,
+    pub language: String,
     #[serde(rename = "type")]
-    template_type: TemplateType,
-    path: PathBuf,
-    language: String,
+    pub project_type: ProjectType,
+    pub path: PathBuf,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct FileTemplate {
+    pub name: String,
+    pub ext: String,
+    pub language: String,
+    pub path: PathBuf,
 }
