@@ -4,11 +4,11 @@ use std::path::PathBuf;
 use xdg::BaseDirectories;
 
 /// return data home or create the folder
-pub fn get_data_home(folder: Option<&str>) -> Result<PathBuf, io::Error> {
+pub fn get_data_home(folder: &str) -> Result<PathBuf, io::Error> {
     let xdg_dirs = BaseDirectories::new().unwrap();
 
     let data_home = xdg_dirs.get_data_home();
-    let dir = format!("pcli/{}", folder.unwrap_or(""));
+    let dir = format!("pcli/{}", folder);
 
     let path = data_home.join(dir);
 
