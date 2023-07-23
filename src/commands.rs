@@ -1,5 +1,5 @@
 use crate::projects;
-use clap::{self, Args, Parser, Subcommand, ValueEnum};
+use clap::{self, Parser, Subcommand};
 
 #[derive(Parser)]
 #[clap(name = "pcli")]
@@ -11,6 +11,5 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    List
-    Project(projects::commands::ProjectArgs)
+    Project(projects::commands::ProjectArgs),
 }

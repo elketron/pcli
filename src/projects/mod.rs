@@ -15,14 +15,17 @@ pub fn project_match(cmd: ProjectCommands) {
     let mut data: Projects = json.read_json();
 
     match cmd {
-        ProjectCommands::Add { name, path } => {
-            projects::add(name, path, &mut data);
+        ProjectCommands::Add { path } => {
+            projects::add(path, &mut data);
         }
         ProjectCommands::Remove { name } => {
             projects::remove(name, &mut data);
         }
         ProjectCommands::List {} => {
             projects::list(&data);
+        }
+        ProjectCommands::Open { name } => {
+            projects::open(name, &data);
         }
     }
 
