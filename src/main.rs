@@ -6,6 +6,7 @@ mod projects;
 mod xdg;
 mod environment;
 mod templating;
+mod traits;
 
 fn main() {
     let pcli = commands::Cli::parse();

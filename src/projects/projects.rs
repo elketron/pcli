@@ -1,59 +1,41 @@
 use super::structs::Project;
-use chrono::Utc;
 use std::{env, path::PathBuf};
 
 pub const FILENAME: &str = "projects.json";
+pub type Projects = Vec<Project>;
 
-pub struct Projects {
-    pub data: Vec<Project>,
-}
+pub fn add(name: String, mut path: Option<PathBuf>, data: &mut Projects) {
+    if path.is_none() {
+        path = Some(env::current_dir().unwrap());
+    }
 
-impl Default for Projects {
-    fn default() -> Self {
-        Projects { data: vec![] }
+    if !exists(&name, &data) {
+        let project = Project {
+            name,
+            location: path.unwrap(),
+        };
+
+        data.push(project);
     }
 }
 
-impl Projects {
-    pub fn new(data: Vec<Project>) -> Self {
-        Projects { data }
+pub fn remove(name: String, data: &mut Projects) {
+    let index = data.iter().position(|p| p.name == name);
+
+    if index.is_some() {
+        data.remove(index.unwrap());
     }
+}
 
-    pub fn add(&mut self, name: String, mut path: Option<PathBuf>) {
-        if path.is_none() {
-            path = Some(env::current_dir().unwrap());
-        }
+pub fn list(data: &Projects) {
+    data.iter().for_each(|p| println!("{:?}", p.name));
+}
 
-        if !self.exists(&name) {
-            let project = Project {
-                name,
-                created_at: Utc::now(),
-                modified_at: Utc::now(),
-                location: path.unwrap(),
-            };
+fn exists(name: &str, data: &Projects) -> bool {
+    let project = data.iter().find(|p| p.name == name);
 
-            self.data.push(project);
-        }
-    }
-
-    pub fn remove(&mut self, name: String) {
-        let index = self.data.iter().position(|p| p.name == name);
-
-        if index.is_some() {
-            self.data.remove(index.unwrap());
-        }
-    }
-
-    pub fn list(&self) {
-        self.data.iter().for_each(|p| println!("{:?}", p.name));
-    }
-
-    fn exists(&self, name: &str) -> bool {
-        let project = self.data.iter().find(|p| p.name == name);
-
-        match project {
-            Some(_) => true,
-            None => false,
-        }
+    match project {
+        Some(_) => true,
+        None => false,
     }
 }

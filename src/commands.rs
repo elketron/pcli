@@ -11,5 +11,6 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
+    List
     Project(projects::commands::ProjectArgs)
 }

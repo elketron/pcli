@@ -7,30 +7,20 @@ use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
 #[derive(Default)]
-pub enum FilePlace {
-    #[default]
-    XDG,
-    Current,
-}
-
-#[derive(Default)]
 pub struct JsonIO {
-    pub folder: String,
-    pub place: FilePlace,
+    pub path: PathBuf,
 }
 
 impl JsonIO {
-    pub fn new(folder: &str, place: FilePlace) -> Self {
-        JsonIO { folder: folder.to_string(), place }
+    pub fn new(path: PathBuf) -> Self {
+        JsonIO { path }
     }
 
-    pub fn read_json<T>(&self, file_name: &str) -> Vec<T>
+    pub fn read_json<T>(&self) -> Vec<T>
     where
         for<'de> T: Deserialize<'de> + Serialize,
     {
-        let file = self.get_file_path(file_name);
-
-        let mut file = match File::open(file) {
+        let mut file = match File::open(&self.path) {
             Ok(file) => file,
             Err(_) => return Vec::new(),
         };
@@ -47,37 +37,15 @@ impl JsonIO {
         }
     }
 
-    pub fn write_json<T>(
-        &self,
-        file_name: &str,
-        data: &Vec<T>,
-    ) -> Result<(), Box<dyn std::error::Error>>
+    pub fn write_json<T>(&self, data: &Vec<T>) -> Result<(), Box<dyn std::error::Error>>
     where
         T: Serialize,
     {
         let json_data = serde_json::to_string(data)?;
 
-        let file_path = self.get_file_path(file_name);
-        let mut file = File::create(file_path)?;
+        let mut file = File::create(&self.path)?;
         file.write_all(json_data.as_bytes())?;
 
         Ok(())
-    }
-
-    fn get_file_path(&self, file_name: &str) -> PathBuf {
-        let file = match self.place {
-            FilePlace::XDG => {
-                let path = xdg::get_data_home(&self.folder);
-                let file_path = format!("{}/{}", path.unwrap().to_string_lossy(), file_name);
-                Path::new(&file_path).to_path_buf()
-            }
-            FilePlace::Current => {
-                let mut path = current_dir().expect("cannot reach current dir");
-                path.push(file_name);
-                path.as_path().to_path_buf()
-            }
-        };
-
-        file
     }
 }
