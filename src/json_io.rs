@@ -16,28 +16,28 @@ impl JsonIO {
         JsonIO { path }
     }
 
-    pub fn read_json<T>(&self) -> Vec<T>
+    pub fn read_json<T>(&self) -> Option<T>
     where
         for<'de> T: Deserialize<'de> + Serialize,
     {
         let mut file = match File::open(&self.path) {
             Ok(file) => file,
-            Err(_) => return Vec::new(),
+            Err(_) => return None,
         };
 
         let mut contents = String::new();
         match file.read_to_string(&mut contents) {
             Ok(_) => (),
-            Err(_) => return Vec::new(),
+            Err(_) => return None,
         };
 
         match serde_json::from_str(&contents) {
             Ok(v) => v,
-            Err(_) => Vec::new(),
+            Err(_) => None,
         }
     }
 
-    pub fn write_json<T>(&self, data: &Vec<T>) -> Result<(), Box<dyn std::error::Error>>
+    pub fn write_json<T>(&self, data: &T) -> Result<(), Box<dyn std::error::Error>>
     where
         T: Serialize,
     {

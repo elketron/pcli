@@ -1,8 +1,9 @@
 use std::path::PathBuf;
 
+use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, ValueEnum, Debug)]
 pub enum ProjectType {
     Cli,
     API,
@@ -10,10 +11,13 @@ pub enum ProjectType {
     Server,
     Library,
     Webapp,
+    Mobile,
+    Game,
+    Embedded,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Template {
+#[derive(Serialize, Deserialize, Default)]
+pub struct Templates {
     pub project_templates: Vec<ProjectTemplate>,
     pub file_templates: Vec<FileTemplate>,
 }
@@ -25,12 +29,12 @@ pub struct ProjectTemplate {
     #[serde(rename = "type")]
     pub project_type: ProjectType,
     pub path: PathBuf,
+    pub config: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct FileTemplate {
     pub name: String,
-    pub ext: String,
     pub language: String,
     pub path: PathBuf,
 }

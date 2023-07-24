@@ -12,7 +12,7 @@ pub fn project_match(cmd: ProjectCommands) {
     file.set_file_name(FILENAME);
     let json = JsonIO::new(file);
 
-    let mut data: Projects = json.read_json();
+    let mut data: Projects = json.read_json().unwrap_or(Vec::new());
 
     match cmd {
         ProjectCommands::Add { path } => {
@@ -26,6 +26,20 @@ pub fn project_match(cmd: ProjectCommands) {
         }
         ProjectCommands::Open { name } => {
             projects::open(name, &data);
+        }
+        ProjectCommands::Create {
+            name,
+            template,
+            language,
+        } => {
+            projects::create(&mut data, name, template, language);
+        }
+        ProjectCommands::File {
+            name,
+            language,
+            output,
+        } => {
+            projects::file(&data, name, language, output);
         }
     }
 

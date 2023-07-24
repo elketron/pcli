@@ -1,4 +1,4 @@
-use crate::projects;
+use crate::{projects, templating::commands::TemplateAgs};
 use clap::{self, Parser, Subcommand};
 
 #[derive(Parser)]
@@ -12,4 +12,5 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Command {
     Project(projects::commands::ProjectArgs),
+    Template(TemplateAgs)
 }

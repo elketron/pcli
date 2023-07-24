@@ -8,8 +8,24 @@ pub struct ProjectArgs {
 
 #[derive(clap::Subcommand)]
 pub enum ProjectCommands {
-    Add { path: Option<PathBuf> },
-    Remove { name: String },
+    Add {
+        path: Option<PathBuf>,
+    },
+    Remove {
+        name: String,
+    },
     List {},
-    Open { name: String },
+    Open {
+        name: String,
+    },
+    Create {
+        name: String,
+        template: String,
+        language: String,
+    },
+    File {
+        name: String,
+        language: String,
+        output: PathBuf,
+    },
 }
