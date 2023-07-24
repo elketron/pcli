@@ -9,10 +9,10 @@ these let you add projects and templates. Templates are defined in two different
 
 ## todo
 
-- [] add vars for file templates
-- [] add todos
-- [] add functionality for todos in project (every todoitem is a git branch and will merge on completion)
-- [] add todo groups (same as normal todos in git terms.)
-- [] add functionality for project commands and configuration in the .proj dir
-- [] fix bugs
-- [] think of more stuff to add
+- [ ] add vars for file templates
+- [ ] add todos
+- [ ] add functionality for todos in project (every todoitem is a git branch and will merge on completion)
+- [ ] add todo groups (same as normal todos in git terms.)
+- [ ] add functionality for project commands and configuration in the .proj dir
+- [ ] fix bugs
+- [ ] think of more stuff to add
