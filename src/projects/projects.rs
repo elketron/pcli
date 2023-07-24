@@ -1,5 +1,5 @@
 use super::structs::Project;
-use crate::templating;
+use crate::{cmd::git_checkout, templating};
 use std::{
     env::{self, set_current_dir},
     path::PathBuf,
@@ -9,13 +9,20 @@ use std::{
 pub const FILENAME: &str = "projects.json";
 pub type Projects = Vec<Project>;
 
-pub fn add(mut path: Option<PathBuf>, data: &mut Projects) {
-    if path.is_none() {
-        path = Some(env::current_dir().unwrap());
-    }
+pub fn add(path: Option<PathBuf>, data: &mut Projects) {
+    let path = match path {
+        Some(p) => {
+            if "." == p.to_str().unwrap() {
+                env::current_dir().unwrap()
+            } else {
+                p
+            }
+        }
+        None => env::current_dir().unwrap(),
+    };
+
     let name = path
         .clone()
-        .unwrap()
         .file_name()
         .unwrap()
         .to_str()
@@ -25,7 +32,7 @@ pub fn add(mut path: Option<PathBuf>, data: &mut Projects) {
     if !exists(&name, &data) {
         let project = Project {
             name,
-            location: path.unwrap(),
+            location: path,
         };
 
         data.push(project);
@@ -77,10 +84,13 @@ pub fn create(data: &mut Projects, name: String, template: String, language: Str
     let project_dir = env::var("PROJECT_DIR").unwrap_or("".to_string());
     let template_data = templating::get_templates();
 
+    let template_name = template.split('.').nth(0).unwrap();
+    let template_config = template.split('.').nth(1);
+
     let template = template_data
         .project_templates
         .iter()
-        .find(|p| p.name == template && p.language == language);
+        .find(|p| p.name == template_name && p.language == language);
 
     if !exists(&name, &data) {
         let path = if project_dir.is_empty() {
@@ -92,6 +102,15 @@ pub fn create(data: &mut Projects, name: String, template: String, language: Str
             name: name.clone(),
             location: path.clone(),
         };
+
+        if template_config.is_some() {
+            git_checkout(
+                template.unwrap().path.clone(),
+                template_config.unwrap().to_string(),
+            );
+        } else {
+            git_checkout(template.unwrap().path.clone(), "master".to_string());
+        }
 
         //mv template to project_dir
         let mut command = Command::new("cp");

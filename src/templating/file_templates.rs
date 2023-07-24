@@ -8,7 +8,7 @@ use crate::xdg;
 use super::structs::{FileTemplate, Templates};
 
 pub fn add(data: &mut Templates, name: String, language: String) {
-    let config_path = xdg::get_data_home(&format!("pcli/file_templates/{}", &language)).unwrap();
+    let config_path = xdg::get_data_home(&format!("file_templates/{}", &language)).unwrap();
     let current_dir = env::current_dir().unwrap();
     let path = current_dir.join(&name);
 

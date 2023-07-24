@@ -16,7 +16,8 @@ pub fn add(
     path: PathBuf,
     project_type: ProjectType,
 ) {
-    let dir = xdg::get_data_home(&format!("pcli/project_templates/{}", &language)).unwrap();
+    let dir = xdg::get_data_home(&format!("project_templates/{}", &language)).unwrap();
+    println!("{:?}", dir);
 
     let config_path = dir.join(&name);
 
@@ -78,10 +79,7 @@ pub fn add_config(data: &mut Templates, name: String, language: String, config: 
     //add config by making a git branch
     let path = template.as_ref().unwrap().path.clone();
     let mut command = Command::new("git");
-    command
-        .arg("branch")
-        .arg(config.clone())
-        .current_dir(path);
+    command.arg("branch").arg(config.clone()).current_dir(path);
     command.output().expect("failed to execute process");
 
     if template.is_some() {
