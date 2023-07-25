@@ -120,6 +120,16 @@ pub fn create(data: &mut Projects, name: String, template: String, language: Str
             .arg(path.join(name.clone()));
         command.output().expect("failed to execute process");
 
+        let mut command = Command::new("rm");
+        command.arg("-rf").arg(path.join(name.clone()).join(".git"));
+
+        let mut command = Command::new("git");
+        command
+            .arg("init")
+            .current_dir(path.join(name.clone()))
+            .output()
+            .expect("failed to execute process");
+
         data.push(project);
     }
 }
