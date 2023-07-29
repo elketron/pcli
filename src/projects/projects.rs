@@ -48,7 +48,7 @@ pub fn remove(name: String, data: &mut Projects) {
 }
 
 pub fn list(data: &Projects) {
-    data.iter().for_each(|p| println!("{:?}", p.name));
+    data.iter().for_each(|p| println!("{}", p.name));
 }
 
 fn exists(name: &str, data: &Projects) -> bool {

@@ -16,3 +16,4 @@ these let you add projects and templates. Templates are defined in two different
 - [ ] add functionality for project commands and configuration in the .proj dir
 - [ ] fix bugs
 - [ ] think of more stuff to add
+- [ ] add rules for how / where files should end up (in the project config file). with filetype
