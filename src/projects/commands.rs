@@ -20,8 +20,8 @@ pub enum ProjectCommands {
     },
     Create {
         name: String,
-        template: String,
-        language: String,
+        template: Option<String>,
+        language: Option<String>,
     },
     File {
         name: String,

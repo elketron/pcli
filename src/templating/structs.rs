@@ -22,7 +22,7 @@ pub struct Templates {
     pub file_templates: Vec<FileTemplate>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ProjectTemplate {
     pub name: String,
     pub language: String,

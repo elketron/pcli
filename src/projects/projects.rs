@@ -1,5 +1,11 @@
 use super::structs::Project;
-use crate::{cmd::git_checkout, templating};
+use crate::{
+    cmd::{self, git_checkout, git_init},
+    templating::{
+        self,
+        structs::{self, ProjectTemplate},
+    },
+};
 use std::{
     env::{self, set_current_dir},
     path::PathBuf,
@@ -80,17 +86,41 @@ pub fn open(name: String, data: &Projects) {
     }
 }
 
-pub fn create(data: &mut Projects, name: String, template: String, language: String) {
+fn process_template(template: Option<&str>, language: Option<&str>) -> Option<ProjectTemplate> {
+    if let Some(template_str) = template {
+        let template_data = templating::get_templates();
+        let mut template_config = "master";
+
+        let mut template_parts = template_str.split('.');
+        let template_name = template_parts.next().unwrap();
+
+        if let Some(config) = template_parts.next() {
+            template_config = config;
+        }
+
+        if let Some(template) = template_data
+            .project_templates
+            .iter()
+            .find(|p| p.name == template_name && p.language == language.unwrap_or_default())
+        {
+            git_checkout(template.path.clone(), template_config.to_string());
+            return Some(template.clone());
+        } else {
+            println!("Template not found.");
+        }
+    }
+
+    None
+}
+
+pub fn create(
+    data: &mut Projects,
+    name: String,
+    template: Option<String>,
+    language: Option<String>,
+) {
     let project_dir = env::var("PROJECT_DIR").unwrap_or("".to_string());
-    let template_data = templating::get_templates();
-
-    let template_name = template.split('.').nth(0).unwrap();
-    let template_config = template.split('.').nth(1);
-
-    let template = template_data
-        .project_templates
-        .iter()
-        .find(|p| p.name == template_name && p.language == language);
+    println!("project_dir: {}", project_dir);
 
     if !exists(&name, &data) {
         let path = if project_dir.is_empty() {
@@ -103,33 +133,17 @@ pub fn create(data: &mut Projects, name: String, template: String, language: Str
             location: path.clone(),
         };
 
-        if template_config.is_some() {
-            git_checkout(
-                template.unwrap().path.clone(),
-                template_config.unwrap().to_string(),
-            );
-        } else {
-            git_checkout(template.unwrap().path.clone(), "master".to_string());
-        }
+        let template = process_template(template.as_deref(), language.as_deref());
 
         //mv template to project_dir
-        let mut command = Command::new("cp");
-        command
-            .arg("-r")
-            .arg(template.unwrap().path.clone())
-            .arg(path.join(name.clone()));
-        command.output().expect("failed to execute process");
+        if template.is_some() {
+            cmd::cp(template.unwrap().path.clone(), path.join(name.clone()));
+            cmd::rm(path.join(name.clone()).join(".git"));
+        } else {
+            cmd::mkdir(path.join(name.clone()));
+        }
 
-        let mut command = Command::new("rm");
-        command.arg("-rf").arg(path.join(name.clone()).join(".git"));
-
-        let mut command = Command::new("git");
-        command
-            .arg("init")
-            .current_dir(path.join(name.clone()))
-            .output()
-            .expect("failed to execute process");
-
+        git_init(path.join(name.clone()));
         data.push(project);
     }
 }
