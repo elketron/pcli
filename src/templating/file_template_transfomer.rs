@@ -31,20 +31,14 @@ impl FileTemplateTransformer {
         template_file: PathBuf,
         language: &str,
         project_name: &str,
+        filename: &str,
     ) -> FileTemplateTransformer {
         let template_file = fs::read_to_string(template_file).unwrap();
-
-        let filename = PathBuf::from(&template_file)
-            .file_name()
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string();
 
         FileTemplateTransformer {
             template_file: template_file.to_string(),
             regex: FileTemplateTransformer::generate_regex(),
-            filename: filename,
+            filename: filename.to_string(),
             language: language.to_string(),
             project_name: project_name.to_string(),
         }
@@ -52,6 +46,8 @@ impl FileTemplateTransformer {
 
     pub fn transform(&mut self) -> &Self {
         let mut string = String::from(self.template_file.as_str());
+        let mut output = String::new();
+        //println!("{}", string);
 
         let date = chrono::Local::now().format("%Y-%m-%d").to_string();
 
@@ -67,10 +63,13 @@ impl FileTemplateTransformer {
             };
 
             if replacement != "" {
+                //println!("{} -> {}", capture, replacement);
                 string = string.replace(capture, replacement);
             }
         }
+        println!("{}", output);
 
+        //println!("{}", string);
         self.template_file = string;
 
         self
@@ -87,74 +86,3 @@ impl FileTemplateTransformer {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_transform() {
-        let template_file = r#"
-        # {{ filename }}
-        # {{ projectname }}
-        # {{ language }}
-        # {{ test }}
-        "#;
-
-        let transformer = FileTemplateTransformer::new(template_file, "test", "test", "test");
-        let result = transformer.transform();
-
-        let expected = r#"
-        # test
-        # test
-        # test
-        # {{ test }}
-        "#;
-
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_transform_multiple_per_line() {
-        let template_file = r#"# {{ filename }} {{ projectname }} {{ language }}"#;
-
-        let transformer = FileTemplateTransformer::new(template_file, "test", "test", "test");
-        let result = transformer.transform();
-
-        println!("{}", result);
-
-        let expected = r#"# test test test"#;
-
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_transform_complex() {
-        let templatefile = r#" 
-            public class {{ filename }} {
-                public static void main(String[] args) {
-                    System.out.println("{{ projectname }}");
-                    System.out.println("{{ language }}");
-                    System.out.println("{{ test }}");
-
-                }
-            }
-        "#;
-
-        let transformer = FileTemplateTransformer::new(templatefile, "test", "test", "test");
-        let result = transformer.transform();
-
-        println!("{}", result);
-
-        let expected = r#" 
-            public class test {
-                public static void main(String[] args) {
-                    System.out.println("test");
-                    System.out.println("test");
-                    System.out.println("{{ test }}");
-                }
-            }
-        "#;
-
-        assert_eq!(result, expected);
-    }
-}

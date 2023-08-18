@@ -35,6 +35,7 @@ pub struct ProjectTemplate {
 #[derive(Serialize, Deserialize)]
 pub struct FileTemplate {
     pub name: String,
+    pub name_with_extension: String,
     pub language: String,
     pub path: PathBuf,
 }

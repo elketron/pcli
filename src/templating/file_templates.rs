@@ -22,8 +22,12 @@ pub fn add(data: &mut Templates, name: String, language: String) {
             .spawn()
             .expect("Failed to copy file template");
 
+        let name_without_extension: String = name.split(".").take(1).collect();
+        println!("{}", name_without_extension);
+
         let template = FileTemplate {
-            name,
+            name: name_without_extension.clone(),
+            name_with_extension: name,
             language,
             path: config_path.clone(),
         };
@@ -64,10 +68,13 @@ pub fn use_template(data: &Templates, name: String, language: String, output: Pa
         let template = template.unwrap();
         let path = template.path.clone();
 
+        let path_with_name = path.join(&template.name_with_extension);
+
         file_template_transfomer::FileTemplateTransformer::open(
-            path,
+            path_with_name,
             language.as_str(),
             name.as_str(),
+            output.file_stem().unwrap().to_str().unwrap(),
         )
         .transform()
         .to_file(output);

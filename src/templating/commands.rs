@@ -17,8 +17,8 @@ pub struct TemplateAgs {
 #[derive(clap::Subcommand)]
 pub enum SubCommand {
     #[clap(name = "add")]
-    /// add a template
-    /// for file templates you only need to use the name and language fields
+    /// add a template.
+    /// for file templates you only need to use the name and language fields.
     /// for project templates you need to use all fields
     Add {
         name: String,
