@@ -9,6 +9,7 @@ use self::{
 pub mod commands;
 mod file_templates;
 mod project_templates;
+mod file_template_transfomer;
 pub mod structs;
 
 const FILENAME: &str = "templates.json";

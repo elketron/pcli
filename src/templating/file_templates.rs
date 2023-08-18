@@ -3,6 +3,7 @@ use std::process::Command;
 use std::{env::set_current_dir, path::PathBuf};
 
 use crate::cmd::open_editor;
+use crate::templating::file_template_transfomer;
 use crate::xdg;
 
 use super::structs::{FileTemplate, Templates};
@@ -63,12 +64,20 @@ pub fn use_template(data: &Templates, name: String, language: String, output: Pa
         let template = template.unwrap();
         let path = template.path.clone();
 
-        Command::new("cp")
-            .arg("-r")
-            .arg(path)
-            .arg(&output)
-            .spawn()
-            .expect("Failed to copy file template");
+        file_template_transfomer::FileTemplateTransformer::open(
+            path,
+            language.as_str(),
+            name.as_str(),
+        )
+        .transform()
+        .to_file(output);
+
+        // Command::new("cp")
+        //     .arg("-r")
+        //     .arg(path)
+        //     .arg(&output)
+        //     .spawn()
+        //     .expect("Failed to copy file template");
     }
 }
 
