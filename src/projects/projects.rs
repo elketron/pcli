@@ -3,6 +3,7 @@ use crate::{
     cmd::{self, git_checkout, git_init},
     templating::{
         self,
+        project_template_transformer::ProjectTemplateTransformer,
         structs::{self, ProjectTemplate},
     },
 };
@@ -145,6 +146,8 @@ pub fn create(
 
         git_init(path.join(name.clone()));
         data.push(project);
+
+        ProjectTemplateTransformer::new(path.join(name.clone())).transform();
     }
 }
 
