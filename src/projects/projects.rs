@@ -124,7 +124,7 @@ pub fn create(
     println!("project_dir: {}", project_dir);
 
     if !exists(&name, &data) {
-        let path = if project_dir.is_empty() {
+        let mut path = if project_dir.is_empty() {
             env::current_dir().unwrap()
         } else {
             PathBuf::from(project_dir)
@@ -133,6 +133,8 @@ pub fn create(
             name: name.clone(),
             location: path.clone(),
         };
+
+        path = path.join(name.clone());
 
         let template = process_template(template.as_deref(), language.as_deref());
 

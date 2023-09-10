@@ -43,6 +43,7 @@ impl JsonIO {
     {
         let json_data = serde_json::to_string(data)?;
 
+
         let mut file = File::create(&self.path)?;
         file.write_all(json_data.as_bytes())?;
 

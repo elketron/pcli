@@ -1,13 +1,15 @@
 use clap::Parser;
 
+mod Todos;
+mod cmd;
 mod commands;
+mod configuration;
 mod environment;
 mod json_io;
 mod projects;
 mod templating;
 mod traits;
 mod xdg;
-mod cmd;
 
 fn main() {
     let pcli = commands::Cli::parse();
@@ -18,6 +20,9 @@ fn main() {
         }
         commands::Command::Template(args) => {
             templating::template_match(args.command.unwrap(), args.template, args.filetemplate);
+        }
+        commands::Command::Todo(args) => {
+            Todos::todo_match(args.command.unwrap(), args.todo, args.group);
         }
     }
 }
